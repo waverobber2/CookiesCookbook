@@ -28,29 +28,29 @@ public class CookieRecipesApp
             _recipesConsoleUI.DisplayMainMenu();
             var userInput = _recipesConsoleUI.GetMenuInput();
 
-            switch (userInput)
+            if (userInput == "1")
             {
-                case "1":
-                    _recipesConsoleUI.DisplayAllRecipes(allRecipes);
-                    Console.ReadKey();
-                    break;
-                case "2":
-                    var ingredients = _recipesConsoleUI.PromptForIngredients();
-                    if (!string.IsNullOrEmpty(ingredients))
-                    {
-                        string newRecipe = ingredients;
-                        //allRecipes.Add(newRecipe);
-                        //_recipesRepository.WriteAllRecipes(allRecipes);
-                        //_recipesConsoleUI.DisplayNewRecipe(newRecipe);
-                    }
-                    else
-                    {
-                        Console.WriteLine("No ingredients were provided. Recipe not added.");
-                    }
-                    break;
-                case "3":
-                    isActive = false;
-                    break;
+                _recipesConsoleUI.DisplayAllRecipes(allRecipes);
+                Console.ReadKey();
+            }
+            else if (userInput == "2")
+            {
+                var ingredients = _recipesConsoleUI.PromptForIngredients();
+                if (!string.IsNullOrEmpty(ingredients))
+                {
+                    string newRecipe = ingredients;
+                    //allRecipes.Add(newRecipe);
+                    //_recipesRepository.WriteAllRecipes(allRecipes);
+                    //_recipesConsoleUI.DisplayNewRecipe(newRecipe);
+                }
+                else
+                {
+                    Console.WriteLine("No ingredients were provided. Recipe not added.");
+                }
+            }
+            else if (userInput == "3")
+            {
+                isActive = false;
             }
 
         } while (isActive);
@@ -162,12 +162,5 @@ public class RecipesRepository : IRecipesRepository
     public void WriteAllRecipes(string allRecipes)
     {
         Console.WriteLine($"Writing all recipes: {allRecipes}");
-        GetAnyKeyPress();
-    }
-
-    private void GetAnyKeyPress()
-    {
-        Console.WriteLine("Press any key to continue...");
-        Console.ReadKey();
     }
 }
