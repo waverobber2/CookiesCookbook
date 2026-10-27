@@ -1,4 +1,7 @@
-﻿RecipesConsoleUI _recipesConsoleUI = new RecipesConsoleUI();
+﻿using CookiesCookbook.Recipes;
+using CookiesCookbook.Recipes.Ingredients;
+
+RecipesConsoleUI _recipesConsoleUI = new RecipesConsoleUI();
 RecipesRepository _recipesRepository = new RecipesRepository("recipes.json");
 
 var cookieRecipesApp = new CookieRecipesApp(_recipesConsoleUI, _recipesRepository);
@@ -17,7 +20,7 @@ public class CookieRecipesApp
 
     public void Run()
     {
-        string allRecipes = _recipesRepository.ReadAllRecipes();
+        List<Recipe> allRecipes = _recipesRepository.ReadAllRecipes();
 
         bool isActive = true;
         do
@@ -29,6 +32,7 @@ public class CookieRecipesApp
             {
                 case "1":
                     _recipesConsoleUI.DisplayAllRecipes(allRecipes);
+                    Console.ReadKey();
                     break;
                 case "2":
                     var ingredients = _recipesConsoleUI.PromptForIngredients();
@@ -36,8 +40,8 @@ public class CookieRecipesApp
                     {
                         string newRecipe = ingredients;
                         //allRecipes.Add(newRecipe);
-                        _recipesRepository.WriteAllRecipes(allRecipes);
-                        _recipesConsoleUI.DisplayNewRecipe(newRecipe);
+                        //_recipesRepository.WriteAllRecipes(allRecipes);
+                        //_recipesConsoleUI.DisplayNewRecipe(newRecipe);
                     }
                     else
                     {
@@ -55,7 +59,7 @@ public class CookieRecipesApp
 
 public interface IRecipesConsoleUI
 {
-    void DisplayAllRecipes(string recipes);
+    void DisplayAllRecipes(IEnumerable<Recipe> recipes);
     void DisplayMainMenu();
     void DisplayNewRecipe(string newRecipe);
     string GetMenuInput();
@@ -87,10 +91,17 @@ public class RecipesConsoleUI : IRecipesConsoleUI
         } while (true);
     }
 
-    public void DisplayAllRecipes(string recipes)
+    public void DisplayAllRecipes(IEnumerable<Recipe> recipes)
     {
-        Console.WriteLine($"Displaying all recipes: {recipes}");
-        GetAnyKeyPress();
+        Console.WriteLine("Displaying all recipes:");
+        int counter = 1;
+
+        foreach (var recipe in recipes)
+        {
+            Console.WriteLine($"***** {counter} *****");
+            Console.WriteLine(recipe);
+            counter++;
+        }
     }
 
     public void DisplayNewRecipe(string newRecipe)
@@ -114,7 +125,7 @@ public class RecipesConsoleUI : IRecipesConsoleUI
 
 public interface IRecipesRepository
 {
-    string ReadAllRecipes();
+    List<Recipe> ReadAllRecipes();
     void WriteAllRecipes(string allRecipes);
 }
 
@@ -127,10 +138,25 @@ public class RecipesRepository : IRecipesRepository
         _filePath = filePath;
     }
 
-    public string ReadAllRecipes()
+    public List<Recipe> ReadAllRecipes()
     {
-        var result = $"Reading all recipes from {_filePath}";
-        return result;
+        return new List<Recipe>
+        {
+            new Recipe(new List<Ingredient>
+            {
+                new WhiteFlour(),
+                new Sugar(),
+                new Butter(),
+                new Egg()
+            }),
+            new Recipe(new List<Ingredient>
+            {
+                new WheatFlour(),
+                new Honey(),
+                new Cinnamon(),
+                new Nutmeg()
+            })
+        };
     }
 
     public void WriteAllRecipes(string allRecipes)

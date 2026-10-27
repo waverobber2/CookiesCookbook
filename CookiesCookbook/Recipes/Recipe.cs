@@ -10,4 +10,10 @@ public class Recipe
     {
         Ingredients = ingredients;
     }
+
+    public override string ToString()
+    {
+        var steps = Ingredients.Select(ingredient => $"{ingredient.Name} - {ingredient.PrepInstructions}");
+        return string.Join(Environment.NewLine, steps);
+    }
 }
