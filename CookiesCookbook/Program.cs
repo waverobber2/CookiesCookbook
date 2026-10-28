@@ -1,8 +1,9 @@
 ﻿using CookiesCookbook.Recipes;
 using CookiesCookbook.Recipes.Ingredients;
 
-RecipesConsoleUI _recipesConsoleUI = new RecipesConsoleUI();
-RecipesRepository _recipesRepository = new RecipesRepository("recipes.json");
+IngredientRegister _ingredientRegister = new();
+RecipesConsoleUI _recipesConsoleUI = new(_ingredientRegister);
+RecipesRepository _recipesRepository = new("recipes.json");
 
 var cookieRecipesApp = new CookieRecipesApp(_recipesConsoleUI, _recipesRepository);
 cookieRecipesApp.Run();
@@ -31,7 +32,6 @@ public class CookieRecipesApp
             if (userInput == "1")
             {
                 _recipesConsoleUI.DisplayAllRecipes(allRecipes);
-                Console.ReadKey();
             }
             else if (userInput == "2")
             {
@@ -68,10 +68,18 @@ public interface IRecipesConsoleUI
 
 public class RecipesConsoleUI : IRecipesConsoleUI
 {
+    private readonly IIngredientRegister _ingredientRegister;
+
+    public RecipesConsoleUI(IIngredientRegister ingredientRegister)
+    {
+        _ingredientRegister = ingredientRegister;
+    }
+
     public void DisplayMainMenu()
     {
+        Console.Clear();
         Console.WriteLine("Welcome to the Cookie Recipes App!");
-        Console.WriteLine("1. View all recipes");
+        Console.WriteLine($"{Environment.NewLine}1. View all recipes");
         Console.WriteLine("2. Add a new recipe");
         Console.WriteLine("3. Exit");
     }
@@ -80,7 +88,7 @@ public class RecipesConsoleUI : IRecipesConsoleUI
     {
         do
         {
-            Console.Write("Please select an option: ");
+            Console.Write($"{Environment.NewLine}Please select a menu option: ");
             var input = Console.ReadLine();
             if (input == "1" || input == "2" || input == "3")
             {
@@ -93,14 +101,24 @@ public class RecipesConsoleUI : IRecipesConsoleUI
 
     public void DisplayAllRecipes(IEnumerable<Recipe> recipes)
     {
-        Console.WriteLine("Displaying all recipes:");
-        int counter = 1;
-
-        foreach (var recipe in recipes)
+        if (recipes is null)
         {
-            Console.WriteLine($"***** {counter} *****");
-            Console.WriteLine(recipe);
-            counter++;
+            DisplayMessage("There are no saved recipes.");
+            GetAnyKeyPress();
+        }
+        else
+        {
+            DisplayMessage("Hers's your saved recipes...");
+
+            int counter = 1;
+            foreach (var recipe in recipes)
+            {
+                Console.WriteLine();
+                Console.WriteLine($"***** {counter} *****");
+                Console.WriteLine(recipe);
+                counter++;
+            }
+            GetAnyKeyPress();
         }
     }
 
@@ -112,13 +130,19 @@ public class RecipesConsoleUI : IRecipesConsoleUI
 
     private void GetAnyKeyPress()
     {
-        Console.WriteLine("Press any key to continue...");
+        Console.WriteLine($"{Environment.NewLine}Press any key to continue...");
         Console.ReadKey();
+    }
+
+    private void DisplayMessage(string msg)
+    {
+        Console.Clear();
+        Console.WriteLine(msg);
     }
 
     public string? PromptForIngredients()
     {
-        Console.Write("Please enter the ingredients for the new recipe: ");
+        Console.Write("Enter the ingredients for the new recipe: ");
         return Console.ReadLine();
     }
 }
