@@ -35,7 +35,9 @@ public class CookieRecipesApp
             }
             else if (userInput == "2")
             {
-                var ingredients = _recipesConsoleUI.PromptForNewRecipe();
+                _recipesConsoleUI.PromptForNewRecipe();
+                var ingredients = _recipesConsoleUI.PromptForIngredients();
+
                 if (ingredients != null && ingredients.Any())
                 {
                     Recipe newRecipe = new Recipe(ingredients);
@@ -66,7 +68,8 @@ public interface IRecipesConsoleUI
     void GetAnyKeyPress();
     void DisplayNewRecipe(Recipe newRecipe);
     string GetMenuInput();
-    IEnumerable<Ingredient>? PromptForNewRecipe();
+    void PromptForNewRecipe();
+    IEnumerable<Ingredient>? PromptForIngredients();
 }
 
 public class RecipesConsoleUI : IRecipesConsoleUI
@@ -110,7 +113,7 @@ public class RecipesConsoleUI : IRecipesConsoleUI
         }
         else
         {
-            DisplayMessage("Hers's your saved recipes...");
+            DisplayMessage("Here's your saved recipes...");
 
             int counter = 1;
             foreach (var recipe in recipes)
@@ -133,7 +136,6 @@ public class RecipesConsoleUI : IRecipesConsoleUI
             Console.WriteLine(ingredient);
         }
         GetAnyKeyPress();
-
     }
 
     public void GetAnyKeyPress()
@@ -148,14 +150,19 @@ public class RecipesConsoleUI : IRecipesConsoleUI
         Console.WriteLine(msg);
     }
 
-    IEnumerable<Ingredient>? IRecipesConsoleUI.PromptForNewRecipe()
+    public void PromptForNewRecipe()
     {
-        var ingredients = new List<Ingredient>();
         DisplayMessage($"Create a cookie recipe. Available ingrediients are...{Environment.NewLine}");
         foreach (var ingredient in _ingredientRegister.All)
         {
             Console.WriteLine(ingredient);
         }
+    }
+
+    public IEnumerable<Ingredient>? PromptForIngredients()
+    {
+        var ingredients = new List<Ingredient>();
+
         Console.WriteLine();
         do
         {
@@ -188,6 +195,10 @@ public class RecipesConsoleUI : IRecipesConsoleUI
         return ingredients;
     }
 }
+
+/// <summary>
+/// //////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
 
 public interface IRecipesRepository
 {

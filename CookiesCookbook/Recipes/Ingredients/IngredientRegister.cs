@@ -1,11 +1,5 @@
 ﻿namespace CookiesCookbook.Recipes.Ingredients;
 
-public interface IIngredientRegister
-{
-    IEnumerable<Ingredient> All { get; }
-    Ingredient? GetById(int id);
-}
-
 public class IngredientRegister : IIngredientRegister
 {
     public IEnumerable<Ingredient> All { get; } = new List<Ingredient>
