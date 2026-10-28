@@ -35,17 +35,18 @@ public class CookieRecipesApp
             }
             else if (userInput == "2")
             {
-                var ingredients = _recipesConsoleUI.PromptForIngredients();
-                if (!string.IsNullOrEmpty(ingredients))
+                var ingredients = _recipesConsoleUI.PromptForNewRecipe();
+                if (ingredients != null && ingredients.Any())
                 {
-                    string newRecipe = ingredients;
-                    //allRecipes.Add(newRecipe);
+                    Recipe newRecipe = new Recipe(ingredients);
+                    allRecipes.Add(newRecipe);
                     //_recipesRepository.WriteAllRecipes(allRecipes);
-                    //_recipesConsoleUI.DisplayNewRecipe(newRecipe);
+                    _recipesConsoleUI.DisplayNewRecipe(newRecipe);
                 }
                 else
                 {
-                    Console.WriteLine("No ingredients were provided. Recipe not added.");
+                    _recipesConsoleUI.DisplayMessage("No ingredients were selected. Recipe not created.");
+                    _recipesConsoleUI.GetAnyKeyPress();
                 }
             }
             else if (userInput == "3")
@@ -61,15 +62,16 @@ public interface IRecipesConsoleUI
 {
     void DisplayAllRecipes(IEnumerable<Recipe> recipes);
     void DisplayMainMenu();
-    void DisplayNewRecipe(string newRecipe);
+    void DisplayMessage(string msg);
+    void GetAnyKeyPress();
+    void DisplayNewRecipe(Recipe newRecipe);
     string GetMenuInput();
-    string? PromptForIngredients();
+    IEnumerable<Ingredient>? PromptForNewRecipe();
 }
 
 public class RecipesConsoleUI : IRecipesConsoleUI
 {
     private readonly IIngredientRegister _ingredientRegister;
-
     public RecipesConsoleUI(IIngredientRegister ingredientRegister)
     {
         _ingredientRegister = ingredientRegister;
@@ -122,28 +124,68 @@ public class RecipesConsoleUI : IRecipesConsoleUI
         }
     }
 
-    public void DisplayNewRecipe(string newRecipe)
+    public void DisplayNewRecipe(Recipe newRecipe)
     {
-        Console.WriteLine($"New recipe added: {newRecipe}");
+        Console.WriteLine();
+        Console.WriteLine($"***** New recipe added! *****");
+        foreach (var ingredient in newRecipe.Ingredients)
+        {
+            Console.WriteLine(ingredient);
+        }
         GetAnyKeyPress();
+
     }
 
-    private void GetAnyKeyPress()
+    public void GetAnyKeyPress()
     {
         Console.WriteLine($"{Environment.NewLine}Press any key to continue...");
         Console.ReadKey();
     }
 
-    private void DisplayMessage(string msg)
+    public void DisplayMessage(string msg)
     {
         Console.Clear();
         Console.WriteLine(msg);
     }
 
-    public string? PromptForIngredients()
+    IEnumerable<Ingredient>? IRecipesConsoleUI.PromptForNewRecipe()
     {
-        Console.Write("Enter the ingredients for the new recipe: ");
-        return Console.ReadLine();
+        var ingredients = new List<Ingredient>();
+        DisplayMessage($"Create a cookie recipe. Available ingrediients are...{Environment.NewLine}");
+        foreach (var ingredient in _ingredientRegister.All)
+        {
+            Console.WriteLine(ingredient);
+        }
+        Console.WriteLine();
+        do
+        {
+            Console.Write($"Enter ingredients by id, or 'Q' when done: ");
+            var userInput = Console.ReadLine();
+            if (userInput?.ToUpper() == "Q")
+            {
+                break;
+            }
+
+            if (int.TryParse(userInput, out int ingredientId))
+            {
+                var ingredient = _ingredientRegister.GetById(ingredientId);
+                if (ingredient != null)
+                {
+                    ingredients.Add(ingredient);
+                    Console.WriteLine($"{ingredient.Name} added.");
+                }
+                else
+                {
+                    Console.WriteLine($"Ingredient with id {ingredientId} not found.");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"{userInput} is not a valid id. Try again.");
+            }
+        } while (true);
+
+        return ingredients;
     }
 }
 
