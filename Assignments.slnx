@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="CookiesCookbook/CookiesCookbook.csproj" />
+  <Project Path="GameDataParser/GameDataParser.csproj" Id="5baaa500-87a7-40d7-892e-50ef404f4502" />
 </Solution>
