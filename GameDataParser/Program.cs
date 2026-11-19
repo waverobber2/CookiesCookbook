@@ -16,22 +16,37 @@ public class GameDataParserApp
 
     public void Run()
     {
-        var fileName = _consoleUI.PromptForFileName();
-        var videoGames = _gameRepository.Read(fileName);
-
-        if (videoGames.Count > 0)
+        while (true)
         {
-            foreach (var game in videoGames)
+            var fileName = _consoleUI.PromptForFileName();
+            if (fileName is null)
             {
-                Console.WriteLine(game);
+                return;
+            }
+
+            List<VideoGame> videoGames;
+            try
+            {
+                videoGames = _gameRepository.Read(fileName);
+            }
+            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            {
+                Console.Error.WriteLine($"Error reading '{fileName}': {ex.Message}");
+                continue;
+            }
+
+            if (videoGames.Count > 0)
+            {
+                foreach (var game in videoGames)
+                {
+                    Console.WriteLine(game);
+                }
+            }
+            else
+            {
+                Console.WriteLine("No games have been recorded...");
             }
         }
-        else
-        {
-            Console.WriteLine("No games have been recorded...");
-        }
-
-        Console.ReadKey();
     }
 }
 
@@ -59,8 +74,13 @@ public class GameRepository : IGameRepository
     public List<VideoGame> Read(string fileName)
     {
         using var fileStream = File.OpenRead(fileName);
-        return JsonSerializer.Deserialize<List<VideoGame>>(fileStream);
-        //?? throw new JsonException("The file did not contain a video game list.");
+        return NewMethod(fileStream);
+    }
+
+    private static List<VideoGame> NewMethod(FileStream fileStream)
+    {
+        return JsonSerializer.Deserialize<List<VideoGame>>(fileStream) ??
+            throw new JsonException("The file did not contain a video game list.");
     }
 }
 
@@ -74,5 +94,5 @@ public class VideoGame
 
 /*
 games.json
-gamesInvalidFormat.json
+gamesInvalid.json
 */
