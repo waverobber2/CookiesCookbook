@@ -1,86 +1,94 @@
 ﻿using System.Text.Json;
 
-GameDataParserApp gameDataParser = new(new ConsoleUI(), new GameRepository());
+GameDataParserApp gameDataParser = new(new ConsoleUI());
 gameDataParser.Run();
 
 public class GameDataParserApp
 {
     private readonly IConsoleUI _consoleUI;
-    private readonly IGameRepository _gameRepository;
 
-    public GameDataParserApp(IConsoleUI consoleUI, IGameRepository gameRepository)
+    public GameDataParserApp(IConsoleUI consoleUI)
     {
         _consoleUI = consoleUI;
-        _gameRepository = gameRepository;
     }
 
     public void Run()
     {
-        while (true)
-        {
-            var fileName = _consoleUI.PromptForFileName();
-            if (fileName is null)
-            {
-                return;
-            }
+        bool isFileRead = false;
+        var fileContents = default(string);
 
-            List<VideoGame> videoGames;
+        do
+        {
             try
             {
-                videoGames = _gameRepository.Read(fileName);
+                string fileName = _consoleUI.PromptForFileName();
+                fileContents = File.ReadAllText(fileName);
+                isFileRead = true;
             }
-            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            catch (ArgumentNullException ex)
             {
-                Console.Error.WriteLine($"Error reading '{fileName}': {ex.Message}");
-                continue;
+                Console.WriteLine("The filename cannot be null...");
             }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine("The filename cannot be empty...");
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("The filename does not exist...");
+            }
+        } while (!isFileRead);
 
-            if (videoGames.Count > 0)
+        var videoGames = JsonSerializer.Deserialize<List<VideoGame>>(fileContents);
+
+
+        if (videoGames.Count > 0)
+        {
+            _consoleUI.GamesHeader();
+            foreach (var videoGame in videoGames)
             {
-                foreach (var game in videoGames)
-                {
-                    Console.WriteLine(game);
-                }
+                Console.WriteLine(videoGame);
             }
-            else
-            {
-                Console.WriteLine("No games have been recorded...");
-            }
+            _consoleUI.PressAnyKey();
+        }
+        else
+        {
+            _consoleUI.FileIsEmpty();
+            _consoleUI.PressAnyKey();
         }
     }
 }
 
 public interface IConsoleUI
 {
+    void FileIsEmpty();
     string? PromptForFileName();
+    void PressAnyKey();
+    void GamesHeader();
 }
 
 public class ConsoleUI : IConsoleUI
 {
+    public void FileIsEmpty()
+    {
+        Console.WriteLine("The file does not have any saved games...");
+    }
+
     public string? PromptForFileName()
     {
-        Console.Write("Enter the name of the file you want to read: ");
+        Console.Write($"{Environment.NewLine}Enter the name of the file you want to read: ");
         return Console.ReadLine();
     }
-}
 
-public interface IGameRepository
-{
-    List<VideoGame> Read(string fileName);
-}
-
-public class GameRepository : IGameRepository
-{
-    public List<VideoGame> Read(string fileName)
+    public void PressAnyKey()
     {
-        using var fileStream = File.OpenRead(fileName);
-        return NewMethod(fileStream);
+        Console.Write($"{Environment.NewLine}Press any key to continue");
+        Console.ReadKey();
     }
 
-    private static List<VideoGame> NewMethod(FileStream fileStream)
+    public void GamesHeader()
     {
-        return JsonSerializer.Deserialize<List<VideoGame>>(fileStream) ??
-            throw new JsonException("The file did not contain a video game list.");
+        Console.WriteLine($"{Environment.NewLine}Loaded games are:{Environment.NewLine}");
     }
 }
 
