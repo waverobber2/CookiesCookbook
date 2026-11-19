@@ -21,6 +21,36 @@
     {
         Console.WriteLine($"{Environment.NewLine}Loaded games are:{Environment.NewLine}");
     }
+
+    public string? ReadValidFilePathFromUser()
+    {
+        bool isFilePthValid = false;
+        var fileName = default(string);
+
+        do
+        {
+            fileName = PromptForFileName();
+
+            if (fileName is null)
+            {
+                Console.WriteLine("The filename cannot be null...");
+            }
+            else if (fileName.Length == 0)
+            {
+                Console.WriteLine("The filename cannot be empty...");
+            }
+            else if (!File.Exists(fileName))
+            {
+                Console.WriteLine("The filename does not exist...");
+            }
+            else
+            {
+                isFilePthValid = true;
+            }
+        } while (!isFilePthValid);
+
+        return fileName;
+    }
 }
 
 /*

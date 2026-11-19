@@ -11,31 +11,8 @@ public class GameDataParserApp
 
     public void Run()
     {
-        bool isFileRead = false;
-        var fileContents = default(string);
-        var fileName = default(string);
-
-        do
-        {
-            try
-            {
-                fileName = _consoleUI.PromptForFileName();
-                fileContents = File.ReadAllText(fileName);
-                isFileRead = true;
-            }
-            catch (ArgumentNullException ex)
-            {
-                Console.WriteLine("The filename cannot be null...");
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine("The filename cannot be empty...");
-            }
-            catch (FileNotFoundException ex)
-            {
-                Console.WriteLine("The filename does not exist...");
-            }
-        } while (!isFileRead);
+        string? fileName = _consoleUI.ReadValidFilePathFromUser();
+        var fileContents = File.ReadAllText(fileName);
 
         List<VideoGame> videoGames = default;
 
@@ -69,7 +46,6 @@ public class GameDataParserApp
         else
         {
             _consoleUI.FileIsEmpty();
-            _consoleUI.PressAnyKey();
         }
     }
 }
@@ -77,4 +53,29 @@ public class GameDataParserApp
 /*
 games.json
 gamesInvalid.json
+
+Original Try/Catch block replaced by simpler If
+
+//do
+//{
+//    try
+//    {
+//        fileName = _consoleUI.PromptForFileName();
+//        fileContents = File.ReadAllText(fileName);
+//        isFileRead = true;
+//    }
+//    catch (ArgumentNullException ex)
+//    {
+//        Console.WriteLine("The filename cannot be null...");
+//    }
+//    catch (ArgumentException ex)
+//    {
+//        Console.WriteLine("The filename cannot be empty...");
+//    }
+//    catch (FileNotFoundException ex)
+//    {
+//        Console.WriteLine("The filename does not exist...");
+//    }
+//} while (!isFileRead);
+
 */

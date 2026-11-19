@@ -4,6 +4,7 @@
     string? PromptForFileName();
     void PressAnyKey();
     void GamesHeader();
+    string? ReadValidFilePathFromUser();
 }
 
 /*

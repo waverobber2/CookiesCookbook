@@ -12,8 +12,3 @@ catch (Exception ex)
     Console.WriteLine("Sorry, the application has encountered a unexpected error and will self destruct!");
 }
 ui.PressAnyKey();
-
-/*
-games.json
-gamesInvalid.json
-*/
